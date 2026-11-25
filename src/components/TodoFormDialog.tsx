@@ -1,0 +1,127 @@
+"use client";
+
+import { useState, type FormEvent } from "react";
+import { addTodo, updateTodo, weeklyGoalsOf } from "@/lib/data";
+import { useAppStore } from "@/lib/store";
+import type { DayIndex, Priority, Todo } from "@/lib/types";
+import { DAY_LABELS } from "@/lib/week";
+import { Modal, ghostBtn, inputCls, primaryBtn } from "./ui";
+
+interface Props {
+  weekStart: string;
+  /** 있으면 수정, 없으면 생성 */
+  todo?: Todo;
+  defaultDay?: DayIndex | null;
+  onClose: () => void;
+}
+
+export function TodoFormDialog({ weekStart, todo, defaultDay = null, onClose }: Props) {
+  const data = useAppStore((s) => s.data);
+  const apply = useAppStore((s) => s.apply);
+  const weeklyGoals = weeklyGoalsOf(data, weekStart);
+
+  const [title, setTitle] = useState(todo?.title ?? "");
+  const [description, setDescription] = useState(todo?.description ?? "");
+  const [day, setDay] = useState<string>(String(todo ? (todo.day ?? "") : (defaultDay ?? "")));
+  const [weeklyGoalId, setWeeklyGoalId] = useState(todo?.weeklyGoalId ?? "");
+  const [priority, setPriority] = useState<string>(todo?.priority ?? "");
+  const [dueDate, setDueDate] = useState(todo?.dueDate ?? "");
+
+  function submit(e: FormEvent) {
+    e.preventDefault();
+    if (!title.trim()) return;
+    const fields = {
+      title: title.trim(),
+      description,
+      day: day === "" ? null : (Number(day) as DayIndex),
+      weeklyGoalId: weeklyGoalId || null,
+      priority: (priority || null) as Priority | null,
+      dueDate: dueDate || null,
+    };
+    apply((d) => (todo ? updateTodo(d, todo.id, fields) : addTodo(d, { ...fields, weekStart })));
+    onClose();
+  }
+
+  return (
+    <Modal title={todo ? "할 일 수정" : "새 할 일"} onClose={onClose}>
+      <form onSubmit={submit} className="space-y-3">
+        <label className="block text-sm">
+          제목
+          <input
+            className={inputCls}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            autoFocus
+            required
+          />
+        </label>
+        <label className="block text-sm">
+          설명
+          <textarea
+            className={inputCls}
+            rows={2}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </label>
+        <div className="grid grid-cols-2 gap-3">
+          <label className="block text-sm">
+            요일
+            <select className={inputCls} value={day} onChange={(e) => setDay(e.target.value)}>
+              <option value="">미지정</option>
+              {DAY_LABELS.map((l, i) => (
+                <option key={l} value={i}>
+                  {l}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block text-sm">
+            우선순위
+            <select className={inputCls} value={priority} onChange={(e) => setPriority(e.target.value)}>
+              <option value="">없음</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </label>
+        </div>
+        <label className="block text-sm">
+          주간 목표
+          <select
+            className={inputCls}
+            value={weeklyGoalId}
+            onChange={(e) => setWeeklyGoalId(e.target.value)}
+          >
+            <option value="">연결 안 함</option>
+            {weeklyGoals.map((w) => (
+              <option key={w.id} value={w.id}>
+                {w.title}
+              </option>
+            ))}
+          </select>
+          {weeklyGoals.length === 0 && (
+            <span className="text-xs text-zinc-500">이 주에는 주간 목표가 없습니다. 주간 계획에서 추가하세요.</span>
+          )}
+        </label>
+        <label className="block text-sm">
+          마감일
+          <input
+            type="date"
+            className={inputCls}
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+          />
+        </label>
+        <div className="flex justify-end gap-2 pt-2">
+          <button type="button" className={ghostBtn} onClick={onClose}>
+            취소
+          </button>
+          <button type="submit" className={primaryBtn} disabled={!title.trim()}>
+            {todo ? "저장" : "추가"}
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+}

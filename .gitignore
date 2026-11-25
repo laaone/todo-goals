@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 설정 예시는 커밋한다
+!.env.example
+
+# 에이전트 작업 상태 (세션 정보)
+.omc/
