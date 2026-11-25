@@ -4,7 +4,18 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { KanbanBoard } from "@/components/KanbanBoard";
 import { TodoFormDialog } from "@/components/TodoFormDialog";
-import { ProgressBar, Skeleton, WeekNavigator, primaryBtn } from "@/components/ui";
+import {
+  ProgressBar,
+  Skeleton,
+  WeekNavigator,
+  cardCls,
+  pageTitleCls,
+  primaryBtn,
+  sectionTitleCls,
+  textBtn,
+} from "@/components/ui";
+
+const linkCls = "font-semibold text-ink underline underline-offset-4";
 import { todosOfWeek, weeklyGoalsOf } from "@/lib/data";
 import { weeklyGoalProgress, weekProgress } from "@/lib/progress";
 import { useAppStore, useViewStore, useHydrated } from "@/lib/store";
@@ -36,74 +47,88 @@ export default function DashboardPage() {
   const isEmpty = data.goals.length === 0 && data.todos.length === 0 && data.weeklyGoals.length === 0;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-10">
       {isEmpty && <Onboarding />}
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <WeekNavigator />
-        <button className={primaryBtn} onClick={() => setDialog({})}>
-          + 할 일
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="space-y-3">
+          <h1 className={pageTitleCls}>{isThisWeek ? "이번 주" : "주간 보드"}</h1>
+          <WeekNavigator />
+        </div>
+        <button className={primaryBtn} onClick={() => setDialog({})} aria-label="할 일 추가">
+          <span aria-hidden="true" className="text-lg leading-none">+</span> 할 일
         </button>
       </div>
 
-      <section className="rounded-xl border border-zinc-200 bg-white p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-semibold">이번 주 목표</h2>
-          <Link href="/week" className="text-sm text-zinc-500 hover:underline">
-            주간 계획 편집 →
+      <section aria-labelledby="week-goals">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 id="week-goals" className={sectionTitleCls}>
+            이번 주 목표
+          </h2>
+          <Link href="/week" className={textBtn}>
+            주간 계획 편집
           </Link>
         </div>
-        <ProgressBar progress={weekProgress(data, viewWeek)} label="주간 진행률" />
-        {weeklyGoals.length === 0 ? (
-          <p className="mt-3 text-sm text-zinc-500">이 주에 세운 목표가 없습니다.</p>
-        ) : (
-          <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {weeklyGoals.map((w) => {
-              const goal = w.goalId ? data.goals.find((g) => g.id === w.goalId) : null;
-              return (
-                <li key={w.id} className="rounded-lg bg-zinc-50 p-3">
-                  <p className="text-sm font-medium">{w.title}</p>
-                  <p className="mb-2 text-xs text-zinc-500">{goal ? `↳ ${goal.title}` : "1년 목표 연결 없음"}</p>
-                  <ProgressBar progress={weeklyGoalProgress(data, w.id)} />
-                </li>
-              );
-            })}
-          </ul>
-        )}
+        <div className={`${cardCls} p-6`}>
+          <ProgressBar progress={weekProgress(data, viewWeek)} label="주간 진행률" />
+          {weeklyGoals.length === 0 ? (
+            <p className="mt-4 text-base text-muted">이 주에 세운 목표가 없습니다.</p>
+          ) : (
+            <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {weeklyGoals.map((w) => {
+                const goal = w.goalId ? data.goals.find((g) => g.id === w.goalId) : null;
+                return (
+                  <li key={w.id} className="rounded-card bg-surface-soft p-4">
+                    <p className="text-base font-semibold text-ink">{w.title}</p>
+                    <p className="mb-3 text-sm text-muted">{goal ? `↳ ${goal.title}` : "1년 목표 연결 없음"}</p>
+                    <ProgressBar progress={weeklyGoalProgress(data, w.id)} />
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
       </section>
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div role="tablist" aria-label="요일 필터" className="flex gap-1 overflow-x-auto">
-          {(["all", 0, 1, 2, 3, 4, 5, 6] as DayFilter[]).map((d) => {
-            const active = filter === d;
-            const count = d === "all" ? weekTodos.length : weekTodos.filter((t) => t.day === d).length;
-            return (
-              <button
-                key={d}
-                role="tab"
-                aria-selected={active}
-                onClick={() => setFilter({ week: viewWeek, day: d })}
-                className={`shrink-0 rounded-md px-3 py-1.5 text-sm ${
-                  active ? "bg-zinc-900 text-white" : "bg-white text-zinc-600 hover:bg-zinc-200"
-                }`}
-              >
-                {d === "all" ? "전체" : DAY_LABELS[d]}
-                {count > 0 && <span className="ml-1 text-xs opacity-60">{count}</span>}
-              </button>
-            );
-          })}
+      <section aria-label="할 일 보드" className="space-y-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div role="tablist" aria-label="요일 필터" className="-mx-1 flex gap-2 overflow-x-auto px-1 py-1">
+            {(["all", 0, 1, 2, 3, 4, 5, 6] as DayFilter[]).map((d) => {
+              const active = filter === d;
+              const count = d === "all" ? weekTodos.length : weekTodos.filter((t) => t.day === d).length;
+              return (
+                <button
+                  key={d}
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setFilter({ week: viewWeek, day: d })}
+                  className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+                    active
+                      ? "border-ink bg-ink text-on-primary"
+                      : "border-hairline bg-canvas text-ink hover:border-ink"
+                  }`}
+                >
+                  {d === "all" ? "전체" : DAY_LABELS[d]}
+                  {count > 0 && (
+                    <span className={`ml-1.5 tabular-nums ${active ? "text-on-primary/70" : "text-muted"}`}>{count}</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          <label className="flex items-center gap-2 text-sm font-medium text-ink">
+            <input
+              type="checkbox"
+              className="size-4 accent-ink"
+              checked={sortByPriority}
+              onChange={(e) => setSortByPriority(e.target.checked)}
+            />
+            우선순위순 정렬
+          </label>
         </div>
-        <label className="flex items-center gap-1.5 text-sm text-zinc-600">
-          <input
-            type="checkbox"
-            checked={sortByPriority}
-            onChange={(e) => setSortByPriority(e.target.checked)}
-          />
-          우선순위순 정렬
-        </label>
-      </div>
 
-      <KanbanBoard todos={visible} sortByPriority={sortByPriority} onEdit={(todo) => setDialog({ todo })} />
+        <KanbanBoard todos={visible} sortByPriority={sortByPriority} onEdit={(todo) => setDialog({ todo })} />
+      </section>
 
       {dialog && (
         <TodoFormDialog
@@ -119,16 +144,21 @@ export default function DashboardPage() {
 
 function Onboarding() {
   return (
-    <section className="rounded-xl border border-emerald-200 bg-emerald-50 p-5">
-      <h2 className="mb-2 font-semibold text-emerald-900">처음 오셨네요! 이렇게 시작해 보세요</h2>
-      <ol className="list-inside list-decimal space-y-1 text-sm text-emerald-900">
-        <li>
-          <Link href="/goals" className="font-medium underline">1년 목표</Link>를 세웁니다.
-        </li>
-        <li>
-          <Link href="/week" className="font-medium underline">주간 계획</Link>에서 이번 주 목표(최대 5개)를 1년 목표와 연결합니다.
-        </li>
-        <li>여기서 할 일을 만들고 칸반에서 끌어 옮기며 진행합니다.</li>
+    <section className="rounded-card bg-surface-soft p-6 sm:p-8">
+      <h2 className={sectionTitleCls}>처음 오셨네요! 이렇게 시작해 보세요</h2>
+      <ol className="mt-5 grid gap-4 sm:grid-cols-3">
+        {[
+          { n: 1, body: <><Link href="/goals" className={linkCls}>1년 목표</Link>를 세웁니다.</> },
+          { n: 2, body: <><Link href="/week" className={linkCls}>주간 계획</Link>에서 이번 주 목표(최대 5개)를 1년 목표와 연결합니다.</> },
+          { n: 3, body: <>여기서 할 일을 만들고 칸반에서 끌어 옮기며 진행합니다.</> },
+        ].map((s) => (
+          <li key={s.n} className="flex gap-3 text-base text-body">
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-ink text-sm font-semibold text-on-primary">
+              {s.n}
+            </span>
+            <span>{s.body}</span>
+          </li>
+        ))}
       </ol>
     </section>
   );

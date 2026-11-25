@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { ProgressBar, Skeleton, ghostBtn, inputCls, primaryBtn } from "@/components/ui";
+import { ProgressBar, Skeleton, cardCls, dangerTextBtn, inputCls, pageTitleCls, primaryBtn, secondaryBtn, textBtn } from "@/components/ui";
 import { addGoal, deleteGoal, updateGoal } from "@/lib/data";
 import { goalProgress } from "@/lib/progress";
 import { useAppStore, useHydrated } from "@/lib/store";
@@ -16,11 +16,14 @@ export default function GoalsPage() {
   const goals = [...data.goals].sort((a, b) => b.year - a.year || a.createdAt.localeCompare(b.createdAt));
 
   return (
-    <div className="space-y-5">
-      <h1 className="text-xl font-bold">1년 목표</h1>
+    <div className="space-y-8">
+      <div>
+        <h1 className={pageTitleCls}>1년 목표</h1>
+        <p className="mt-1 text-base text-muted">올해 이루고 싶은 것. 주간 목표가 여기에 연결됩니다.</p>
+      </div>
       <AddGoalForm />
       {goals.length === 0 ? (
-        <p className="text-sm text-zinc-500">아직 1년 목표가 없습니다. 올해 이루고 싶은 것을 적어 보세요.</p>
+        <p className="rounded-card bg-surface-soft p-8 text-center text-base text-muted">아직 1년 목표가 없습니다. 올해 이루고 싶은 것을 적어 보세요.</p>
       ) : (
         <ul className="grid gap-4 md:grid-cols-2">
           {goals.map((g) => (
@@ -47,8 +50,8 @@ function AddGoalForm() {
   }
 
   return (
-    <form onSubmit={submit} className="space-y-2 rounded-xl border border-zinc-200 bg-white p-4">
-      <div className="grid gap-2 sm:grid-cols-[1fr_7rem]">
+    <form onSubmit={submit} className={`${cardCls} space-y-3 p-6`}>
+      <div className="grid gap-3 sm:grid-cols-[1fr_8rem]">
         <input
           className={inputCls}
           placeholder="1년 목표 (예: 하프 마라톤 완주)"
@@ -98,9 +101,9 @@ function GoalCard({ goal }: { goal: Goal }) {
   }
 
   return (
-    <li className="rounded-xl border border-zinc-200 bg-white p-4">
+    <li className={`${cardCls} p-6 transition-shadow hover:shadow-float`}>
       {editing ? (
-        <form onSubmit={save} className="space-y-2">
+        <form onSubmit={save} className="space-y-3">
           <input className={inputCls} value={title} onChange={(e) => setTitle(e.target.value)} aria-label="목표 제목" />
           <textarea
             className={inputCls}
@@ -109,10 +112,10 @@ function GoalCard({ goal }: { goal: Goal }) {
             onChange={(e) => setDescription(e.target.value)}
             aria-label="목표 설명"
           />
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-3">
             <button
               type="button"
-              className={ghostBtn}
+              className={secondaryBtn}
               onClick={() => {
                 setTitle(goal.title);
                 setDescription(goal.description);
@@ -130,15 +133,15 @@ function GoalCard({ goal }: { goal: Goal }) {
         <>
           <div className="flex items-start justify-between gap-2">
             <div>
-              <span className="text-xs text-zinc-500">{goal.year}</span>
-              <h2 className="font-semibold">{goal.title}</h2>
+              <span className="text-sm font-medium text-muted">{goal.year}년</span>
+              <h2 className="text-xl font-semibold text-ink">{goal.title}</h2>
             </div>
             <div className="flex shrink-0 gap-1">
-              <button className={ghostBtn} onClick={() => setEditing(true)}>
+              <button className={textBtn} onClick={() => setEditing(true)}>
                 수정
               </button>
               <button
-                className={`${ghostBtn} text-red-600 hover:bg-red-50`}
+                className={dangerTextBtn}
                 onClick={() => {
                   if (confirm(`"${goal.title}" 목표를 삭제할까요? 연결된 주간 목표와 할 일은 남습니다.`))
                     apply((d) => deleteGoal(d, goal.id));
@@ -148,10 +151,10 @@ function GoalCard({ goal }: { goal: Goal }) {
               </button>
             </div>
           </div>
-          {goal.description && <p className="mt-2 whitespace-pre-wrap text-sm text-zinc-600">{goal.description}</p>}
+          {goal.description && <p className="mt-2 whitespace-pre-wrap text-base text-body">{goal.description}</p>}
         </>
       )}
-      <div className="mt-4">
+      <div className="mt-5">
         <ProgressBar progress={goalProgress(data, goal.id)} label={`목표 진행률 · 주간 목표 ${linkedWeeks.length}개 연결`} />
       </div>
     </li>

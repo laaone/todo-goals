@@ -1,7 +1,40 @@
 @import "tailwindcss";
 
+/*
+ * 디자인 토큰 (docs/DESIGN.md)
+ * - 흰 캔버스 + #222 잉크, 포인트 색은 primary 하나만 (주요 버튼 등 꼭 필요한 곳에만)
+ * - 모서리: 버튼·입력 8px(rounded-btn), 카드 14px(rounded-card), 알약 모양은 rounded-full
+ * - 그림자는 한 단계(shadow-float)뿐: 카드 hover, 드롭다운, 모달
+ */
 @theme inline {
   --font-sans: var(--font-pretendard), "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+
+  --color-canvas: #ffffff;
+  --color-surface-soft: #f7f7f7;
+  --color-surface-strong: #f2f2f2;
+
+  --color-ink: #222222;
+  --color-body: #3f3f3f;
+  --color-muted: #6a6a6a;
+  --color-muted-soft: #929292;
+
+  --color-hairline: #dddddd;
+  --color-hairline-soft: #ebebeb;
+  --color-border-strong: #c1c1c1;
+
+  --color-primary: #ff385c;
+  --color-primary-active: #e00b41;
+  --color-primary-disabled: #ffd1da;
+  --color-on-primary: #ffffff;
+
+  --color-error: #c13515;
+
+  --radius-btn: 8px;
+  --radius-card: 14px;
+  --radius-pill-lg: 32px;
+
+  --shadow-float: rgba(0, 0, 0, 0.02) 0 0 0 1px, rgba(0, 0, 0, 0.04) 0 2px 6px 0,
+    rgba(0, 0, 0, 0.1) 0 4px 8px 0;
 }
 
 body {

@@ -5,7 +5,7 @@ import { addTodo, updateTodo, weeklyGoalsOf } from "@/lib/data";
 import { useAppStore } from "@/lib/store";
 import type { DayIndex, Priority, Todo } from "@/lib/types";
 import { DAY_LABELS } from "@/lib/week";
-import { Modal, ghostBtn, inputCls, primaryBtn } from "./ui";
+import { Modal, inputCls, primaryBtn, secondaryBtn } from "./ui";
 
 interface Props {
   weekStart: string;
@@ -44,8 +44,8 @@ export function TodoFormDialog({ weekStart, todo, defaultDay = null, onClose }: 
 
   return (
     <Modal title={todo ? "할 일 수정" : "새 할 일"} onClose={onClose}>
-      <form onSubmit={submit} className="space-y-3">
-        <label className="block text-sm">
+      <form onSubmit={submit} className="space-y-4">
+        <label className="flex flex-col gap-1.5 text-sm font-medium text-muted">
           제목
           <input
             className={inputCls}
@@ -55,7 +55,7 @@ export function TodoFormDialog({ weekStart, todo, defaultDay = null, onClose }: 
             required
           />
         </label>
-        <label className="block text-sm">
+        <label className="flex flex-col gap-1.5 text-sm font-medium text-muted">
           설명
           <textarea
             className={inputCls}
@@ -65,7 +65,7 @@ export function TodoFormDialog({ weekStart, todo, defaultDay = null, onClose }: 
           />
         </label>
         <div className="grid grid-cols-2 gap-3">
-          <label className="block text-sm">
+          <label className="flex flex-col gap-1.5 text-sm font-medium text-muted">
             요일
             <select className={inputCls} value={day} onChange={(e) => setDay(e.target.value)}>
               <option value="">미지정</option>
@@ -76,17 +76,17 @@ export function TodoFormDialog({ weekStart, todo, defaultDay = null, onClose }: 
               ))}
             </select>
           </label>
-          <label className="block text-sm">
+          <label className="flex flex-col gap-1.5 text-sm font-medium text-muted">
             우선순위
             <select className={inputCls} value={priority} onChange={(e) => setPriority(e.target.value)}>
               <option value="">없음</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
+              <option value="high">높음</option>
+              <option value="medium">보통</option>
+              <option value="low">낮음</option>
             </select>
           </label>
         </div>
-        <label className="block text-sm">
+        <label className="flex flex-col gap-1.5 text-sm font-medium text-muted">
           주간 목표
           <select
             className={inputCls}
@@ -101,10 +101,10 @@ export function TodoFormDialog({ weekStart, todo, defaultDay = null, onClose }: 
             ))}
           </select>
           {weeklyGoals.length === 0 && (
-            <span className="text-xs text-zinc-500">이 주에는 주간 목표가 없습니다. 주간 계획에서 추가하세요.</span>
+            <span className="text-sm font-normal text-muted">이 주에는 주간 목표가 없습니다. 주간 계획에서 추가하세요.</span>
           )}
         </label>
-        <label className="block text-sm">
+        <label className="flex flex-col gap-1.5 text-sm font-medium text-muted">
           마감일
           <input
             type="date"
@@ -113,8 +113,8 @@ export function TodoFormDialog({ weekStart, todo, defaultDay = null, onClose }: 
             onChange={(e) => setDueDate(e.target.value)}
           />
         </label>
-        <div className="flex justify-end gap-2 pt-2">
-          <button type="button" className={ghostBtn} onClick={onClose}>
+        <div className="flex justify-end gap-3 border-t border-hairline pt-5">
+          <button type="button" className={secondaryBtn} onClick={onClose}>
             취소
           </button>
           <button type="submit" className={primaryBtn} disabled={!title.trim()}>

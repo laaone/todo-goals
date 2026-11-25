@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import { ProgressBar, Skeleton, WeekNavigator, ghostBtn, inputCls, primaryBtn } from "@/components/ui";
+import { ProgressBar, Skeleton, WeekNavigator, cardCls, dangerTextBtn, inputCls, pageTitleCls, primaryBtn, sectionTitleCls } from "@/components/ui";
 import {
   addWeeklyGoal,
   canAddWeeklyGoal,
@@ -29,24 +29,24 @@ export default function WeekPage() {
   const canAdd = canAddWeeklyGoal(data, viewWeek);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-bold">주간 계획</h1>
+        <h1 className={pageTitleCls}>주간 계획</h1>
         <WeekNavigator />
       </div>
 
-      <section className="rounded-xl border border-zinc-200 bg-white p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-semibold">
+      <section className={`${cardCls} p-6`}>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className={sectionTitleCls}>
             이번 주 목표{" "}
-            <span className="text-sm font-normal text-zinc-500">
+            <span className="text-base font-medium text-muted">
               {weeklyGoals.length}/{MAX_WEEKLY_GOALS}
             </span>
           </h2>
         </div>
         <ProgressBar progress={weekProgress(data, viewWeek)} label="주간 진행률" />
 
-        <ul className="mt-4 space-y-2">
+        <ul className="mt-6 space-y-3">
           {weeklyGoals.map((w) => (
             <WeeklyGoalRow key={w.id} wg={w} goals={data.goals} />
           ))}
@@ -54,15 +54,15 @@ export default function WeekPage() {
 
         <AddWeeklyGoalForm key={viewWeek} weekStart={viewWeek} goals={data.goals} disabled={!canAdd} />
         {data.goals.length === 0 && (
-          <p className="mt-2 text-xs text-zinc-500">
-            연결할 1년 목표가 없습니다. <Link href="/goals" className="underline">1년 목표</Link>를 먼저 만들어 보세요.
+          <p className="mt-3 text-sm text-muted">
+            연결할 1년 목표가 없습니다. <Link href="/goals" className="font-medium text-ink underline underline-offset-4">1년 목표</Link>를 먼저 만들어 보세요.
           </p>
         )}
       </section>
 
       <section className="grid gap-4 md:grid-cols-2">
-        <label className="block rounded-xl border border-zinc-200 bg-white p-4">
-          <span className="mb-2 block font-semibold">주간 메모</span>
+        <label className={`${cardCls} block p-6`}>
+          <span className={`${sectionTitleCls} mb-3 block`}>주간 메모</span>
           <textarea
             key={`memo-${viewWeek}`}
             className={inputCls}
@@ -75,8 +75,8 @@ export default function WeekPage() {
             }}
           />
         </label>
-        <label className="block rounded-xl border border-zinc-200 bg-white p-4">
-          <span className="mb-2 block font-semibold">주간 회고</span>
+        <label className={`${cardCls} block p-6`}>
+          <span className={`${sectionTitleCls} mb-3 block`}>주간 회고</span>
           <textarea
             key={`review-${viewWeek}`}
             className={inputCls}
@@ -136,7 +136,7 @@ function AddWeeklyGoalForm({
   }
 
   return (
-    <form onSubmit={submit} className="mt-4 grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+    <form onSubmit={submit} className="mt-6 grid gap-3 border-t border-hairline pt-6 sm:grid-cols-[1fr_1fr_auto]">
       <input
         className={inputCls}
         placeholder={disabled ? `주간 목표는 최대 ${MAX_WEEKLY_GOALS}개입니다` : "새 주간 목표"}
@@ -165,7 +165,7 @@ function WeeklyGoalRow({ wg, goals }: { wg: WeeklyGoal; goals: Goal[] }) {
   }
 
   return (
-    <li className="grid gap-2 rounded-lg bg-zinc-50 p-3 sm:grid-cols-[1fr_1fr_auto] sm:items-center">
+    <li className="grid gap-3 rounded-card bg-surface-soft p-4 sm:grid-cols-[1fr_1fr_auto] sm:items-center">
       <input
         className={inputCls}
         value={title}
@@ -180,7 +180,7 @@ function WeeklyGoalRow({ wg, goals }: { wg: WeeklyGoal; goals: Goal[] }) {
         onChange={(v) => apply((d) => updateWeeklyGoal(d, wg.id, { goalId: v || null }))}
       />
       <button
-        className={`${ghostBtn} text-red-600 hover:bg-red-50`}
+        className={dangerTextBtn}
         onClick={() => {
           if (confirm(`주간 목표 "${wg.title}"을(를) 삭제할까요? 연결된 할 일은 남습니다.`))
             apply((d) => deleteWeeklyGoal(d, wg.id));

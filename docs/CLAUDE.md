@@ -36,3 +36,4 @@
 - 연결 구조: 할 일 → 주간 목표(주당 최대 5개) → 1년 목표. 상위 항목을 지우면 하위 항목은 남기고 연결만 `null`로 끊는다.
 - 진행률(`src/lib/progress.ts`) = 완료한 할 일 수 / 연결된 할 일 수, 할 일이 없으면 0%.
 - 칸반 충돌 판정은 포인터 위치 우선(`KanbanBoard.tsx`의 `collisionDetection`). `closestCorners`만 쓰면 옆 열로 잘못 들어간다.
+- 디자인은 `docs/DESIGN.md`를 따른다. 색·모서리·그림자는 `src/app/globals.css`의 토큰(`bg-canvas`, `text-ink`, `text-muted`, `border-hairline`, `bg-primary`, `rounded-btn`, `rounded-card`, `shadow-float`)만 쓰고 Tailwind 기본 팔레트(zinc 등)는 쓰지 않는다. 버튼·입력·카드 클래스는 `src/components/styles.ts`에서 가져온다 (서버 컴포넌트도 import 가능). 포인트 색(primary)은 화면마다 가장 중요한 버튼 하나에만.

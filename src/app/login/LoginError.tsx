@@ -13,7 +13,7 @@ export function LoginError() {
   const error = useSearchParams().get("error");
   if (!error) return null;
   return (
-    <p role="alert" className="mb-4 rounded-md bg-red-50 p-2 text-sm text-red-700">
+    <p role="alert" className="mb-5 rounded-btn bg-[#fff0ee] px-4 py-3 text-left text-sm text-error">
       {MESSAGES[error] ?? "로그인하지 못했습니다."}
     </p>
   );

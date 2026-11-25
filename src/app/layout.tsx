@@ -19,12 +19,14 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="ko" className={`${pretendard.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col bg-zinc-100 text-zinc-900">
+      <body className="flex min-h-full flex-col bg-canvas text-ink">
         <StoreHydrator />
         <Nav />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">{children}</main>
-        <footer className="py-4 text-center text-xs text-zinc-400">
-          데이터는 GitHub 계정별로 서버에 저장됩니다.
+        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 sm:py-10 lg:px-10">{children}</main>
+        <footer className="border-t border-hairline bg-canvas">
+          <p className="mx-auto max-w-7xl px-4 py-6 text-[13px] text-muted sm:px-6 lg:px-10">
+            © 2026 목표 → 할 일 · 데이터는 GitHub 계정별로 서버에 저장됩니다.
+          </p>
         </footer>
       </body>
     </html>
