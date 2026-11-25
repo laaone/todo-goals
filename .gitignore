@@ -45,3 +45,5 @@ next-env.d.ts
 
 # 에이전트 작업 상태 (세션 정보)
 .omc/
+.vercel
+.env*
