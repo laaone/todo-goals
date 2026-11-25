@@ -22,6 +22,11 @@ export interface WeeklyPlan {
   review: string;
 }
 
+/** 주간 목표 하나의 목표 횟수 범위 (하루 한 번 체크, 주 7일) */
+export const MIN_WEEKLY_TARGET = 1;
+export const MAX_WEEKLY_TARGET = 7;
+export const DEFAULT_WEEKLY_TARGET = 3;
+
 /** 이번 주 목표 (주당 최대 MAX_WEEKLY_GOALS개) */
 export interface WeeklyGoal {
   id: string;
@@ -29,6 +34,10 @@ export interface WeeklyGoal {
   goalId: string | null;
   title: string;
   order: number;
+  /** 목표 횟수 (1~7). 체크가 이 수에 닿으면 100% */
+  target: number;
+  /** 실행을 체크한 요일들 (하루 한 번, 오름차순) */
+  checks: DayIndex[];
 }
 
 export interface Todo {

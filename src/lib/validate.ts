@@ -3,7 +3,14 @@
  * 클라이언트를 믿지 않는다: userId 같은 필드는 여기서 걸러지고 서버가 쿠키로 붙인다.
  */
 import { COLLECTIONS, type CollectionName, type EntityMap, type SyncPayload } from "./sync";
-import { STATUSES, type DayIndex, type Priority, type Status } from "./types";
+import {
+  MAX_WEEKLY_TARGET,
+  MIN_WEEKLY_TARGET,
+  STATUSES,
+  type DayIndex,
+  type Priority,
+  type Status,
+} from "./types";
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const MAX_ITEMS = 1000;
@@ -29,10 +36,22 @@ const validators: { [C in CollectionName]: Validator<EntityMap[C]> } = {
       ? { weekStart: x.weekStart, memo: x.memo, review: x.review }
       : null,
 
-  weeklyGoals: (x) =>
-    id(x.id) && date(x.weekStart) && nullable(id)(x.goalId) && str(x.title, 200) && num(x.order)
-      ? { id: x.id, weekStart: x.weekStart, goalId: x.goalId, title: x.title, order: x.order }
-      : null,
+  weeklyGoals: (x) => {
+    const okTarget =
+      Number.isInteger(x.target) && (x.target as number) >= MIN_WEEKLY_TARGET && (x.target as number) <= MAX_WEEKLY_TARGET;
+    const checks = x.checks;
+    const okChecks =
+      Array.isArray(checks) &&
+      checks.length <= 7 &&
+      new Set(checks).size === checks.length &&
+      checks.every((d) => Number.isInteger(d) && d >= 0 && d <= 6);
+    return id(x.id) && date(x.weekStart) && nullable(id)(x.goalId) && str(x.title, 200) && num(x.order) && okTarget && okChecks
+      ? {
+          id: x.id, weekStart: x.weekStart, goalId: x.goalId, title: x.title, order: x.order,
+          target: x.target as number, checks: [...(checks as DayIndex[])].sort() as DayIndex[],
+        }
+      : null;
+  },
 
   todos: (x) => {
     const okDay = x.day === null || (Number.isInteger(x.day) && (x.day as number) >= 0 && (x.day as number) <= 6);

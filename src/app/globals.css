@@ -1,42 +1,73 @@
 @import "tailwindcss";
 
 /*
- * 디자인 토큰 (docs/DESIGN.md)
- * - 흰 캔버스 + #222 잉크, 포인트 색은 primary 하나만 (주요 버튼 등 꼭 필요한 곳에만)
- * - 모서리: 버튼·입력 8px(rounded-btn), 카드 14px(rounded-card), 알약 모양은 rounded-full
- * - 그림자는 한 단계(shadow-float)뿐: 카드 hover, 드롭다운, 모달
+ * 디자인 토큰 (docs/Apple DESIGN.md)
+ * - 바탕은 흰색 / 파치먼트(#f5f5f7) / 어두운 타일을 번갈아 쓰고, 색이 바뀌는 것 자체가 구역 구분선이다
+ * - 클릭할 수 있는 요소의 색은 파랑(primary) 하나뿐. 두 번째 강조색은 없다
+ * - 카드·버튼·글자에는 그림자를 쓰지 않는다
+ * - 모서리: 작은 도구 버튼 8px(rounded-util), 입력 11px(rounded-capsule), 카드 18px(rounded-card), 행동 버튼은 알약(rounded-full)
+ * - 글자 굵기는 400 / 600 / 700만 (500은 쓰지 않는다). 본문 17px
  */
 @theme inline {
-  --font-sans: var(--font-pretendard), "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, var(--font-pretendard), "Apple SD Gothic Neo", "Malgun Gothic",
+    system-ui, sans-serif;
 
   --color-canvas: #ffffff;
-  --color-surface-soft: #f7f7f7;
-  --color-surface-strong: #f2f2f2;
+  --color-parchment: #f5f5f7;
+  --color-pearl: #fafafc;
+  --color-tile: #272729;
+  --color-tile-2: #2a2a2c;
+  --color-night: #000000;
 
-  --color-ink: #222222;
-  --color-body: #3f3f3f;
-  --color-muted: #6a6a6a;
-  --color-muted-soft: #929292;
+  --color-ink: #1d1d1f;
+  --color-ink-80: #333333;
+  --color-muted: #6e6e73;
+  --color-muted-48: #7a7a7a;
+  --color-on-dark: #ffffff;
+  --color-on-dark-muted: #cccccc;
 
-  --color-hairline: #dddddd;
-  --color-hairline-soft: #ebebeb;
-  --color-border-strong: #c1c1c1;
+  --color-hairline: #e0e0e0;
+  --color-divider-soft: #f0f0f0;
+  --color-chip: #d2d2d7;
 
-  --color-primary: #ff385c;
-  --color-primary-active: #e00b41;
-  --color-primary-disabled: #ffd1da;
+  --color-primary: #0066cc;
+  --color-primary-focus: #0071e3;
+  --color-primary-on-dark: #2997ff;
   --color-on-primary: #ffffff;
 
-  --color-error: #c13515;
+  /* 상태 표시용(마감 지남, 삭제, 오류). 강조색이 아니라 경고 의미로만 쓴다 */
+  --color-danger: #d70015;
+  --color-danger-on-dark: #ff6961;
 
-  --radius-btn: 8px;
-  --radius-card: 14px;
-  --radius-pill-lg: 32px;
+  /* 실행 기록 그래프: 파랑 한 가지의 밝음→어두움 (적음→많음) */
+  --color-heat-0: #ebebf0;
+  --color-heat-1: #9ec5f4;
+  --color-heat-2: #3987e5;
+  --color-heat-3: #184f95;
 
-  --shadow-float: rgba(0, 0, 0, 0.02) 0 0 0 1px, rgba(0, 0, 0, 0.04) 0 2px 6px 0,
-    rgba(0, 0, 0, 0.1) 0 4px 8px 0;
+  --radius-util: 8px;
+  --radius-capsule: 11px;
+  --radius-card: 18px;
 }
 
 body {
   font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.47;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 제목: 굵기 600 + 살짝 좁은 자간 */
+.headline {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* 모든 버튼의 누름 효과 */
+.press {
+  transition: transform 0.15s ease;
+}
+.press:active:not(:disabled) {
+  transform: scale(0.95);
 }

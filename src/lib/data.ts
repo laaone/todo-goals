@@ -3,7 +3,10 @@
  * 스토어(store.ts)는 이 함수들을 apply()로 호출만 한다.
  */
 import {
+  DEFAULT_WEEKLY_TARGET,
   MAX_WEEKLY_GOALS,
+  MAX_WEEKLY_TARGET,
+  MIN_WEEKLY_TARGET,
   type AppData,
   type DayIndex,
   type Goal,
@@ -19,6 +22,32 @@ const now = () => new Date().toISOString();
 
 export function emptyData(): AppData {
   return { version: 1, goals: [], weeklyPlans: [], weeklyGoals: [], todos: [] };
+}
+
+export const clampTarget = (n: number) =>
+  Math.min(MAX_WEEKLY_TARGET, Math.max(MIN_WEEKLY_TARGET, Math.round(Number.isFinite(n) ? n : MIN_WEEKLY_TARGET)));
+
+const isDay = (v: unknown): v is DayIndex => Number.isInteger(v) && (v as number) >= 0 && (v as number) <= 6;
+
+/**
+ * 예전 형식 데이터를 현재 형식으로 맞춘다. 목표 횟수가 생기기 전의 주간 목표는 1회 목표, 체크 없음.
+ * 이미 맞는 항목은 참조를 그대로 둔다 (sync.ts의 diff가 참조 비교에 기대므로).
+ */
+export function normalizeData(data: AppData): AppData {
+  let changed = false;
+  const weeklyGoals = data.weeklyGoals.map((w) => {
+    const raw = w as Partial<WeeklyGoal> & WeeklyGoal;
+    const ok =
+      Number.isInteger(raw.target) &&
+      raw.target >= MIN_WEEKLY_TARGET &&
+      raw.target <= MAX_WEEKLY_TARGET &&
+      Array.isArray(raw.checks);
+    if (ok) return w;
+    changed = true;
+    const checks = Array.isArray(raw.checks) ? [...new Set(raw.checks.filter(isDay))].sort() : [];
+    return { ...w, target: clampTarget(raw.target ?? MIN_WEEKLY_TARGET), checks };
+  });
+  return changed ? { ...data, weeklyGoals } : data;
 }
 
 /* ───────── 1년 목표 ───────── */
@@ -90,7 +119,7 @@ export function canAddWeeklyGoal(data: AppData, weekStart: string): boolean {
 /** 주당 최대 개수를 넘으면 data를 그대로 반환 */
 export function addWeeklyGoal(
   data: AppData,
-  input: { weekStart: string; title: string; goalId: string | null },
+  input: { weekStart: string; title: string; goalId: string | null; target?: number },
 ): AppData {
   if (!canAddWeeklyGoal(data, input.weekStart)) return data;
   const existing = weeklyGoalsOf(data, input.weekStart);
@@ -100,6 +129,8 @@ export function addWeeklyGoal(
     goalId: input.goalId,
     title: input.title.trim(),
     order: existing.length ? existing[existing.length - 1].order + 1 : 0,
+    target: clampTarget(input.target ?? DEFAULT_WEEKLY_TARGET),
+    checks: [],
   };
   return { ...data, weeklyGoals: [...data.weeklyGoals, wg] };
 }
@@ -107,11 +138,26 @@ export function addWeeklyGoal(
 export function updateWeeklyGoal(
   data: AppData,
   id: string,
-  patch: Partial<Pick<WeeklyGoal, "title" | "goalId">>,
+  patch: Partial<Pick<WeeklyGoal, "title" | "goalId" | "target">>,
 ): AppData {
+  const fixed = patch.target === undefined ? patch : { ...patch, target: clampTarget(patch.target) };
   return {
     ...data,
-    weeklyGoals: data.weeklyGoals.map((w) => (w.id === id ? { ...w, ...patch } : w)),
+    weeklyGoals: data.weeklyGoals.map((w) => (w.id === id ? { ...w, ...fixed } : w)),
+  };
+}
+
+/** 그 요일의 실행 체크를 켜고 끈다 (하루 한 번). 목표 횟수를 넘겨 체크해도 기록은 남는다 */
+export function toggleWeeklyGoalCheck(data: AppData, id: string, day: DayIndex): AppData {
+  return {
+    ...data,
+    weeklyGoals: data.weeklyGoals.map((w) => {
+      if (w.id !== id) return w;
+      const checks = w.checks.includes(day)
+        ? w.checks.filter((d) => d !== day)
+        : ([...w.checks, day].sort() as DayIndex[]);
+      return { ...w, checks };
+    }),
   };
 }
 

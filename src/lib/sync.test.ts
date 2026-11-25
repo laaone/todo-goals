@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addGoal, addTodo, deleteTodo, emptyData, moveTodo, updateWeeklyPlan } from "./data";
+import { addGoal, addTodo, addWeeklyGoal, deleteTodo, emptyData, moveTodo, updateWeeklyPlan } from "./data";
 import { diffData, isEmptyPayload } from "./sync";
 import { validatePayload } from "./validate";
 
@@ -55,5 +55,24 @@ describe("validatePayload", () => {
     expect(validatePayload({ users: {} })).toBeNull();
     expect(validatePayload([])).toBeNull();
     expect(validatePayload({ todos: { delete: [{ $ne: null }] } })).toBeNull();
+  });
+});
+
+describe("validatePayload: 주간 목표 횟수/체크", () => {
+  const wgPayload = (patch: Record<string, unknown>) => {
+    const d = addWeeklyGoal(emptyData(), { weekStart: W, title: "러닝", goalId: null, target: 3 });
+    const p = JSON.parse(JSON.stringify(diffData(emptyData(), d)));
+    Object.assign(p.weeklyGoals.upsert[0], patch);
+    return validatePayload(p);
+  };
+  it("정상 값은 통과", () => {
+    expect(wgPayload({ checks: [4, 0] })?.weeklyGoals?.upsert?.[0]).toMatchObject({ target: 3, checks: [0, 4] });
+  });
+  it("범위 밖 횟수·요일, 중복 체크, 빠진 필드는 거부", () => {
+    expect(wgPayload({ target: 8 })).toBeNull();
+    expect(wgPayload({ target: 0 })).toBeNull();
+    expect(wgPayload({ checks: [7] })).toBeNull();
+    expect(wgPayload({ checks: [1, 1] })).toBeNull();
+    expect(wgPayload({ checks: undefined })).toBeNull();
   });
 });

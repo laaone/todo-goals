@@ -2,7 +2,22 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import { ProgressBar, Skeleton, WeekNavigator, cardCls, dangerTextBtn, inputCls, pageTitleCls, primaryBtn, sectionTitleCls } from "@/components/ui";
+import { DayChecks, TargetStepper } from "@/components/WeeklyGoalParts";
+import {
+  PageHeader,
+  ProgressBar,
+  Skeleton,
+  Tile,
+  WeekNavigator,
+  dangerLinkBtn,
+  heroTitleCls,
+  inputCls,
+  labelCls,
+  primaryBtn,
+  selectPillCls,
+  taglineCls,
+  tileTitleCls,
+} from "@/components/ui";
 import {
   addWeeklyGoal,
   canAddWeeklyGoal,
@@ -12,9 +27,9 @@ import {
   updateWeeklyPlan,
   weeklyGoalsOf,
 } from "@/lib/data";
-import { weeklyGoalProgress, weekProgress } from "@/lib/progress";
-import { useAppStore, useViewStore, useHydrated } from "@/lib/store";
-import { MAX_WEEKLY_GOALS, type Goal, type WeeklyGoal } from "@/lib/types";
+import { checkProgress, weeklyGoalsProgress } from "@/lib/progress";
+import { useAppStore, useHydrated, useViewStore } from "@/lib/store";
+import { DEFAULT_WEEKLY_TARGET, MAX_WEEKLY_GOALS, type Goal, type WeeklyGoal } from "@/lib/types";
 
 export default function WeekPage() {
   const hydrated = useHydrated();
@@ -29,24 +44,33 @@ export default function WeekPage() {
   const canAdd = canAddWeeklyGoal(data, viewWeek);
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className={pageTitleCls}>주간 계획</h1>
-        <WeekNavigator />
-      </div>
+    <>
+      <PageHeader title="주간 계획" />
 
-      <section className={`${cardCls} p-6`}>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className={sectionTitleCls}>
-            이번 주 목표{" "}
-            <span className="text-base font-medium text-muted">
-              {weeklyGoals.length}/{MAX_WEEKLY_GOALS}
-            </span>
-          </h2>
+      <Tile tone="light">
+        <div className="text-center">
+          <h1 className={heroTitleCls}>주간 계획</h1>
+          <p className={`mt-2 ${taglineCls}`}>목표마다 횟수를 정하고, 실행한 날을 체크하세요.</p>
+          <div className="mt-6">
+            <WeekNavigator align="center" />
+          </div>
         </div>
-        <ProgressBar progress={weekProgress(data, viewWeek)} label="주간 진행률" />
+        {weeklyGoals.length > 0 && (
+          <div className="mx-auto mt-10 max-w-md">
+            <ProgressBar progress={weeklyGoalsProgress(weeklyGoals)} label="주간 목표 달성률" unit="회" />
+          </div>
+        )}
+      </Tile>
 
-        <ul className="mt-6 space-y-3">
+      <Tile tone="parchment" aria-labelledby="goals-title">
+        <h2 id="goals-title" className={tileTitleCls}>
+          이번 주 목표{" "}
+          <span className="text-[21px] font-normal text-muted tabular-nums">
+            {weeklyGoals.length}/{MAX_WEEKLY_GOALS}
+          </span>
+        </h2>
+
+        <ul className="mt-8 space-y-5">
           {weeklyGoals.map((w) => (
             <WeeklyGoalRow key={w.id} wg={w} goals={data.goals} />
           ))}
@@ -54,43 +78,48 @@ export default function WeekPage() {
 
         <AddWeeklyGoalForm key={viewWeek} weekStart={viewWeek} goals={data.goals} disabled={!canAdd} />
         {data.goals.length === 0 && (
-          <p className="mt-3 text-sm text-muted">
-            연결할 1년 목표가 없습니다. <Link href="/goals" className="font-medium text-ink underline underline-offset-4">1년 목표</Link>를 먼저 만들어 보세요.
+          <p className="mt-4 text-sm text-muted">
+            연결할 1년 목표가 없습니다.{" "}
+            <Link href="/goals" className="text-primary underline-offset-4 hover:underline">
+              1년 목표 만들기 ›
+            </Link>
           </p>
         )}
-      </section>
+      </Tile>
 
-      <section className="grid gap-4 md:grid-cols-2">
-        <label className={`${cardCls} block p-6`}>
-          <span className={`${sectionTitleCls} mb-3 block`}>주간 메모</span>
-          <textarea
-            key={`memo-${viewWeek}`}
-            className={inputCls}
-            rows={6}
-            placeholder="이번 주에 기억할 것, 계획 메모"
-            defaultValue={plan.memo}
-            onChange={(e) => {
-              const memo = e.target.value;
-              apply((d) => updateWeeklyPlan(d, viewWeek, { memo }));
-            }}
-          />
-        </label>
-        <label className={`${cardCls} block p-6`}>
-          <span className={`${sectionTitleCls} mb-3 block`}>주간 회고</span>
-          <textarea
-            key={`review-${viewWeek}`}
-            className={inputCls}
-            rows={6}
-            placeholder="잘한 점, 아쉬운 점, 다음 주에 바꿀 것"
-            defaultValue={plan.review}
-            onChange={(e) => {
-              const review = e.target.value;
-              apply((d) => updateWeeklyPlan(d, viewWeek, { review }));
-            }}
-          />
-        </label>
-      </section>
-    </div>
+      <Tile tone="light">
+        <div className="grid gap-8 md:grid-cols-2">
+          <label className="block">
+            <span className={`${tileTitleCls} mb-4 block`}>주간 메모</span>
+            <textarea
+              key={`memo-${viewWeek}`}
+              className={inputCls}
+              rows={6}
+              placeholder="이번 주에 기억할 것, 계획 메모"
+              defaultValue={plan.memo}
+              onChange={(e) => {
+                const memo = e.target.value;
+                apply((d) => updateWeeklyPlan(d, viewWeek, { memo }));
+              }}
+            />
+          </label>
+          <label className="block">
+            <span className={`${tileTitleCls} mb-4 block`}>주간 회고</span>
+            <textarea
+              key={`review-${viewWeek}`}
+              className={inputCls}
+              rows={6}
+              placeholder="잘한 점, 아쉬운 점, 다음 주에 바꿀 것"
+              defaultValue={plan.review}
+              onChange={(e) => {
+                const review = e.target.value;
+                apply((d) => updateWeeklyPlan(d, viewWeek, { review }));
+              }}
+            />
+          </label>
+        </div>
+      </Tile>
+    </>
   );
 }
 
@@ -104,7 +133,7 @@ function GoalSelect({
   onChange: (v: string) => void;
 }) {
   return (
-    <select className={inputCls} value={value} onChange={(e) => onChange(e.target.value)} aria-label="연결할 1년 목표">
+    <select className={selectPillCls} value={value} onChange={(e) => onChange(e.target.value)} aria-label="연결할 1년 목표">
       <option value="">1년 목표 연결 안 함</option>
       {goals.map((g) => (
         <option key={g.id} value={g.id}>
@@ -127,34 +156,38 @@ function AddWeeklyGoalForm({
   const apply = useAppStore((s) => s.apply);
   const [title, setTitle] = useState("");
   const [goalId, setGoalId] = useState("");
+  const [target, setTarget] = useState(DEFAULT_WEEKLY_TARGET);
 
   function submit(e: FormEvent) {
     e.preventDefault();
     if (!title.trim() || disabled) return;
-    apply((d) => addWeeklyGoal(d, { weekStart, title, goalId: goalId || null }));
+    apply((d) => addWeeklyGoal(d, { weekStart, title, goalId: goalId || null, target }));
     setTitle("");
   }
 
   return (
-    <form onSubmit={submit} className="mt-6 grid gap-3 border-t border-hairline pt-6 sm:grid-cols-[1fr_1fr_auto]">
+    <form onSubmit={submit} className="mt-8 rounded-card border border-dashed border-black/15 p-6">
+      <p className={labelCls}>새 주간 목표</p>
       <input
         className={inputCls}
-        placeholder={disabled ? `주간 목표는 최대 ${MAX_WEEKLY_GOALS}개입니다` : "새 주간 목표"}
+        placeholder={disabled ? `주간 목표는 최대 ${MAX_WEEKLY_GOALS}개입니다` : "예: 러닝 30분"}
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         disabled={disabled}
         aria-label="새 주간 목표 제목"
       />
-      <GoalSelect goals={goals} value={goalId} onChange={setGoalId} />
-      <button type="submit" className={primaryBtn} disabled={disabled || !title.trim()}>
-        추가
-      </button>
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <TargetStepper value={target} onChange={setTarget} />
+        <GoalSelect goals={goals} value={goalId} onChange={setGoalId} />
+        <button type="submit" className={`${primaryBtn} ml-auto`} disabled={disabled || !title.trim()}>
+          추가
+        </button>
+      </div>
     </form>
   );
 }
 
 function WeeklyGoalRow({ wg, goals }: { wg: WeeklyGoal; goals: Goal[] }) {
-  const data = useAppStore((s) => s.data);
   const apply = useAppStore((s) => s.apply);
   const [title, setTitle] = useState(wg.title);
 
@@ -165,31 +198,39 @@ function WeeklyGoalRow({ wg, goals }: { wg: WeeklyGoal; goals: Goal[] }) {
   }
 
   return (
-    <li className="grid gap-3 rounded-card bg-surface-soft p-4 sm:grid-cols-[1fr_1fr_auto] sm:items-center">
-      <input
-        className={inputCls}
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        onBlur={saveTitle}
-        onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
-        aria-label="주간 목표 제목"
-      />
-      <GoalSelect
-        goals={goals}
-        value={wg.goalId ?? ""}
-        onChange={(v) => apply((d) => updateWeeklyGoal(d, wg.id, { goalId: v || null }))}
-      />
-      <button
-        className={dangerTextBtn}
-        onClick={() => {
-          if (confirm(`주간 목표 "${wg.title}"을(를) 삭제할까요? 연결된 할 일은 남습니다.`))
-            apply((d) => deleteWeeklyGoal(d, wg.id));
-        }}
-      >
-        삭제
-      </button>
-      <div className="sm:col-span-3">
-        <ProgressBar progress={weeklyGoalProgress(data, wg.id)} />
+    <li className="rounded-card bg-canvas p-6">
+      <div className="flex items-start gap-3">
+        <input
+          className="headline w-full rounded-util bg-transparent px-1 py-1 text-[21px] text-ink focus:bg-parchment focus:outline-none"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          onBlur={saveTitle}
+          onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
+          aria-label="주간 목표 제목"
+        />
+        <button
+          className={`${dangerLinkBtn} mt-2 shrink-0`}
+          onClick={() => {
+            if (confirm(`주간 목표 "${wg.title}"을(를) 삭제할까요? 연결된 할 일은 남습니다.`))
+              apply((d) => deleteWeeklyGoal(d, wg.id));
+          }}
+        >
+          삭제
+        </button>
+      </div>
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <TargetStepper value={wg.target} onChange={(n) => apply((d) => updateWeeklyGoal(d, wg.id, { target: n }))} />
+        <GoalSelect
+          goals={goals}
+          value={wg.goalId ?? ""}
+          onChange={(v) => apply((d) => updateWeeklyGoal(d, wg.id, { goalId: v || null }))}
+        />
+      </div>
+      <div className="mt-5 flex flex-col gap-5 lg:flex-row lg:items-center">
+        <DayChecks wg={wg} />
+        <div className="lg:ml-auto lg:w-64">
+          <ProgressBar progress={checkProgress(wg)} label="달성" unit="회" />
+        </div>
       </div>
     </li>
   );

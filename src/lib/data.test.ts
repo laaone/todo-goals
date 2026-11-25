@@ -10,7 +10,10 @@ import {
   emptyData,
   getWeeklyPlan,
   moveTodo,
+  normalizeData,
+  toggleWeeklyGoalCheck,
   updateTodo,
+  updateWeeklyGoal,
   updateWeeklyPlan,
   weeklyGoalsOf,
 } from "./data";
@@ -113,5 +116,33 @@ describe("주간 메모/회고", () => {
     expect(getWeeklyPlan(d, W)).toEqual({ weekStart: W, memo: "이번 주", review: "회고" });
     expect(getWeeklyPlan(d, "2026-11-30").memo).toBe("");
     expect(d.weeklyPlans).toHaveLength(1);
+  });
+});
+
+describe("주간 목표 횟수/체크", () => {
+  it("목표 횟수는 1~7로 맞추고 기본값은 3", () => {
+    let d = addWeeklyGoal(emptyData(), { weekStart: W, title: "A", goalId: null });
+    d = addWeeklyGoal(d, { weekStart: W, title: "B", goalId: null, target: 12 });
+    d = addWeeklyGoal(d, { weekStart: W, title: "C", goalId: null, target: 0 });
+    expect(d.weeklyGoals.map((w) => w.target)).toEqual([3, 7, 1]);
+    d = updateWeeklyGoal(d, d.weeklyGoals[0].id, { target: 5 });
+    expect(d.weeklyGoals[0].target).toBe(5);
+  });
+
+  it("같은 요일을 다시 누르면 체크가 풀리고, 체크는 요일 순으로 정렬된다", () => {
+    let d = addWeeklyGoal(emptyData(), { weekStart: W, title: "A", goalId: null });
+    const id = d.weeklyGoals[0].id;
+    d = toggleWeeklyGoalCheck(d, id, 4);
+    d = toggleWeeklyGoalCheck(d, id, 1);
+    expect(d.weeklyGoals[0].checks).toEqual([1, 4]);
+    d = toggleWeeklyGoalCheck(d, id, 4);
+    expect(d.weeklyGoals[0].checks).toEqual([1]);
+  });
+
+  it("예전 형식(횟수·체크 없음)을 1회 목표로 맞추고, 맞는 데이터는 그대로 둔다", () => {
+    const legacy = { ...emptyData(), weeklyGoals: [{ id: "x", weekStart: W, goalId: null, title: "옛 목표", order: 0 }] } as unknown as AppData;
+    const fixed = normalizeData(legacy);
+    expect(fixed.weeklyGoals[0]).toMatchObject({ target: 1, checks: [] });
+    expect(normalizeData(fixed)).toBe(fixed);
   });
 });

@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import { emptyData } from "./data";
+import { emptyData, normalizeData } from "./data";
 import { diffData, isEmptyData, isEmptyPayload } from "./sync";
 import type { AppData } from "./types";
 
@@ -46,10 +46,12 @@ export const useAppStore = create<AppState>()((set, get) => ({
       const res = await fetch("/api/data", { cache: "no-store" });
       if (res.status === 401) return goToLogin();
       if (!res.ok) throw new Error(`GET /api/data ${res.status}`);
-      const server = (await res.json()) as AppData;
+      // 예전 형식 주간 목표(횟수·체크 없음)를 현재 형식으로 맞춘다. 맞춘 결과를 기준으로 삼아 불필요한 저장을 막는다
+      const server = normalizeData((await res.json()) as AppData);
       confirmed = server;
 
-      const legacy = readLegacy();
+      const raw = readLegacy();
+      const legacy = raw && normalizeData(raw);
       if (legacy && isEmptyData(server) && !isEmptyData(legacy)) {
         // 서버가 비어 있고 이 브라우저에 예전 데이터가 있으면 옮긴다
         set({ data: legacy, loadState: "ready" });

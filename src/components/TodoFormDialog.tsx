@@ -45,7 +45,7 @@ export function TodoFormDialog({ weekStart, todo, defaultDay = null, onClose }: 
   return (
     <Modal title={todo ? "할 일 수정" : "새 할 일"} onClose={onClose}>
       <form onSubmit={submit} className="space-y-4">
-        <label className="flex flex-col gap-1.5 text-sm font-medium text-muted">
+        <label className="flex flex-col gap-1.5 text-sm font-semibold text-ink-80">
           제목
           <input
             className={inputCls}
@@ -55,7 +55,7 @@ export function TodoFormDialog({ weekStart, todo, defaultDay = null, onClose }: 
             required
           />
         </label>
-        <label className="flex flex-col gap-1.5 text-sm font-medium text-muted">
+        <label className="flex flex-col gap-1.5 text-sm font-semibold text-ink-80">
           설명
           <textarea
             className={inputCls}
@@ -65,7 +65,7 @@ export function TodoFormDialog({ weekStart, todo, defaultDay = null, onClose }: 
           />
         </label>
         <div className="grid grid-cols-2 gap-3">
-          <label className="flex flex-col gap-1.5 text-sm font-medium text-muted">
+          <label className="flex flex-col gap-1.5 text-sm font-semibold text-ink-80">
             요일
             <select className={inputCls} value={day} onChange={(e) => setDay(e.target.value)}>
               <option value="">미지정</option>
@@ -76,7 +76,7 @@ export function TodoFormDialog({ weekStart, todo, defaultDay = null, onClose }: 
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-1.5 text-sm font-medium text-muted">
+          <label className="flex flex-col gap-1.5 text-sm font-semibold text-ink-80">
             우선순위
             <select className={inputCls} value={priority} onChange={(e) => setPriority(e.target.value)}>
               <option value="">없음</option>
@@ -86,7 +86,7 @@ export function TodoFormDialog({ weekStart, todo, defaultDay = null, onClose }: 
             </select>
           </label>
         </div>
-        <label className="flex flex-col gap-1.5 text-sm font-medium text-muted">
+        <label className="flex flex-col gap-1.5 text-sm font-semibold text-ink-80">
           주간 목표
           <select
             className={inputCls}
@@ -104,7 +104,7 @@ export function TodoFormDialog({ weekStart, todo, defaultDay = null, onClose }: 
             <span className="text-sm font-normal text-muted">이 주에는 주간 목표가 없습니다. 주간 계획에서 추가하세요.</span>
           )}
         </label>
-        <label className="flex flex-col gap-1.5 text-sm font-medium text-muted">
+        <label className="flex flex-col gap-1.5 text-sm font-semibold text-ink-80">
           마감일
           <input
             type="date"

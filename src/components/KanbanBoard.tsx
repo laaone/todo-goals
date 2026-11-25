@@ -28,18 +28,18 @@ import { deleteTodo, moveTodo } from "@/lib/data";
 import { useAppStore } from "@/lib/store";
 import { STATUSES, type Priority, type Status, type Todo } from "@/lib/types";
 import { DAY_LABELS, todayISO } from "@/lib/week";
-import { dangerTextBtn, textBtn } from "./ui";
+import { dangerLinkBtn, linkSmBtn } from "./styles";
 
 const STATUS_LABEL: Record<Status, string> = { todo: "할 일", doing: "진행 중", done: "완료" };
 const PRIORITY_RANK: Record<Priority, number> = { high: 0, medium: 1, low: 2 };
 const PRIORITY_LABEL: Record<Priority, string> = { high: "높음", medium: "보통", low: "낮음" };
-// 포인트 색은 "높음"에만 쓰고 나머지는 회색 단계로 구분한다
+// 강조색(파랑)은 클릭 요소 전용이라, 우선순위는 잉크 농도로만 구분한다
 const PRIORITY_STYLE: Record<Priority, string> = {
-  high: "bg-[#fff0f3] text-primary-active",
-  medium: "bg-surface-strong text-ink",
-  low: "bg-surface-soft text-muted",
+  high: "bg-ink text-on-dark",
+  medium: "bg-parchment text-ink",
+  low: "border border-black/10 text-muted",
 };
-const chip = "rounded-full px-2.5 py-0.5 text-[13px]";
+const chip = "rounded-full px-2.5 py-0.5 text-sm";
 const COL_PREFIX = "col:";
 
 /**
@@ -159,12 +159,12 @@ function Column({
       ref={setNodeRef}
       aria-label={STATUS_LABEL[status]}
       className={`flex min-h-48 flex-col rounded-card border p-3 transition-colors ${
-        isOver ? "border-ink bg-surface-strong" : "border-transparent bg-surface-soft"
+        isOver ? "border-primary-focus bg-divider-soft" : "border-transparent bg-parchment"
       }`}
     >
-      <h3 className="mb-3 flex items-center gap-2 px-1 text-base font-semibold text-ink">
+      <h3 className="mb-3 flex items-center gap-2 px-1 text-[17px] font-semibold text-ink">
         {STATUS_LABEL[status]}
-        <span className="text-sm font-medium text-muted tabular-nums">{todos.length}</span>
+        <span className="text-sm text-muted tabular-nums">{todos.length}</span>
       </h3>
       <SortableContext items={todos.map((t) => t.id)} strategy={verticalListSortingStrategy}>
         <ul className="flex flex-1 flex-col gap-3">
@@ -172,7 +172,7 @@ function Column({
             <SortableCard key={t.id} todo={t} onEdit={onEdit} reorderDisabled={disabled} />
           ))}
           {todos.length === 0 && (
-            <li className="rounded-card border border-dashed border-hairline py-8 text-center text-sm text-muted-soft">
+            <li className="rounded-card border border-dashed border-black/15 py-8 text-center text-sm text-muted-48">
               여기로 끌어다 놓으세요
             </li>
           )}
@@ -234,12 +234,12 @@ function CardBody({
 
   return (
     <div
-      className={`cursor-grab rounded-card border border-hairline bg-canvas p-4 transition-shadow hover:shadow-float active:cursor-grabbing ${
-        dragging ? "rotate-1 shadow-float" : ""
+      className={`cursor-grab rounded-card border border-black/[0.06] bg-canvas p-4 transition-colors hover:border-black/15 active:cursor-grabbing ${
+        dragging ? "rotate-1 ring-2 ring-primary-focus" : ""
       }`}
     >
       <div className="flex items-start justify-between gap-2">
-        <p className={`text-base font-semibold ${todo.status === "done" ? "text-muted-soft line-through" : "text-ink"}`}>
+        <p className={`text-base font-semibold ${todo.status === "done" ? "text-muted-48 line-through" : "text-ink"}`}>
           {todo.title}
         </p>
         {todo.priority && (
@@ -251,26 +251,26 @@ function CardBody({
       {todo.description && <p className="mt-1 line-clamp-2 text-sm text-muted">{todo.description}</p>}
       <div className="mt-3 flex flex-wrap gap-1.5">
         {todo.day !== null && (
-          <span className={`${chip} bg-surface-soft text-body`}>{DAY_LABELS[todo.day]}요일</span>
+          <span className={`${chip} bg-parchment text-ink-80`}>{DAY_LABELS[todo.day]}요일</span>
         )}
         {todo.dueDate && (
-          <span className={`${chip} ${overdue ? "bg-[#fff0ee] font-semibold text-error" : "bg-surface-soft text-body"}`}>
+          <span className={`${chip} ${overdue ? "bg-danger/10 font-semibold text-danger" : "bg-parchment text-ink-80"}`}>
             {overdue ? "마감 지남 " : "마감 "}
             {todo.dueDate.slice(5).replace("-", "/")}
           </span>
         )}
         {wg && (
-          <span className={`${chip} border border-hairline text-body`} title="주간 목표 → 1년 목표">
+          <span className={`${chip} border border-black/10 text-ink-80`} title="주간 목표 → 1년 목표">
             {wg.title}
             {goal && <span className="text-muted"> → {goal.title}</span>}
           </span>
         )}
       </div>
       {!dragging && onEdit && (
-        <div className="mt-3 flex items-center gap-1 border-t border-hairline-soft pt-3" {...stop}>
+        <div className="mt-3 flex items-center gap-1 border-t border-divider-soft pt-3" {...stop}>
           <select
             aria-label="상태 변경"
-            className="rounded-full border border-hairline bg-canvas px-3 py-1 text-sm text-ink focus:border-ink focus:outline-none"
+            className="rounded-full border border-black/10 bg-canvas px-3 py-1 text-sm text-ink focus:border-primary-focus focus:outline-none"
             value={todo.status}
             onChange={(e) => apply((d) => moveTodo(d, todo.id, e.target.value as Status, null))}
           >
@@ -280,11 +280,11 @@ function CardBody({
               </option>
             ))}
           </select>
-          <button className={`ml-auto ${textBtn}`} onClick={() => onEdit(todo)}>
+          <button className={`ml-auto ${linkSmBtn}`} onClick={() => onEdit(todo)}>
             수정
           </button>
           <button
-            className={dangerTextBtn}
+            className={`ml-3 ${dangerLinkBtn}`}
             onClick={() => {
               if (confirm(`"${todo.title}" 할 일을 삭제할까요?`)) apply((d) => deleteTodo(d, todo.id));
             }}

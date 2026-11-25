@@ -34,6 +34,8 @@
 - 현재 시각(`new Date()`, `getWeekStart()`)은 렌더 중 데이터 로드 확인 **이후에만** 읽는다. 그 전에 읽으면 Next 16 프리렌더가 빌드를 실패시킨다.
 - 주는 월요일 시작, 날짜는 로컬 시간 `YYYY-MM-DD` (`src/lib/week.ts`). `toISOString()`은 UTC라 쓰지 않는다.
 - 연결 구조: 할 일 → 주간 목표(주당 최대 5개) → 1년 목표. 상위 항목을 지우면 하위 항목은 남기고 연결만 `null`로 끊는다.
-- 진행률(`src/lib/progress.ts`) = 완료한 할 일 수 / 연결된 할 일 수, 할 일이 없으면 0%.
+- 진행률(`src/lib/progress.ts`): 할 일 진행률 = 완료한 할 일 / 그 주 할 일. 주간 목표 달성률 = 체크 수 / 목표 횟수(넘쳐도 100%). 주간 목표 전체 = 목표별로 목표 횟수까지만 센 체크 합 / 목표 횟수 합. 1년 목표 실행 기록(`goalActivity`) = 연결된 주간 목표들의 체크를 날짜·주별로 모은 것.
+- 주간 목표는 `target`(주 1~7회, 기본 3)과 `checks`(체크한 요일, 하루 한 번)를 가진다. 이 필드가 없는 예전 데이터는 불러올 때 `normalizeData`가 1회 목표·체크 없음으로 맞춘다.
 - 칸반 충돌 판정은 포인터 위치 우선(`KanbanBoard.tsx`의 `collisionDetection`). `closestCorners`만 쓰면 옆 열로 잘못 들어간다.
-- 디자인은 `docs/DESIGN.md`를 따른다. 색·모서리·그림자는 `src/app/globals.css`의 토큰(`bg-canvas`, `text-ink`, `text-muted`, `border-hairline`, `bg-primary`, `rounded-btn`, `rounded-card`, `shadow-float`)만 쓰고 Tailwind 기본 팔레트(zinc 등)는 쓰지 않는다. 버튼·입력·카드 클래스는 `src/components/styles.ts`에서 가져온다 (서버 컴포넌트도 import 가능). 포인트 색(primary)은 화면마다 가장 중요한 버튼 하나에만.
+- 디자인은 `docs/Apple DESIGN.md`를 따른다. 색은 `src/app/globals.css` 토큰만 쓴다(`bg-canvas`/`bg-parchment`/`bg-tile`, `text-ink`/`text-muted`, `bg-primary` 등). 클릭할 수 있는 요소만 파랑(primary), 두 번째 강조색 금지, 카드·버튼·글자에 그림자 금지, 글자 굵기 400/600/700만(500 금지), 본문 17px. 화면은 `PageHeader` + 가로 전체 `Tile`(light/parchment/dark를 번갈아)로 구성한다. 버튼·입력 클래스는 `src/components/styles.ts`에서 가져온다(서버 컴포넌트도 import 가능). `docs/DESIGN.md`(이전 디자인)는 참고용으로만 남아 있다.
+- 가로 스크롤 영역 안에 `sr-only` 같은 절대 위치 요소를 두면, 스크롤 영역이나 그 칸에 `relative`가 없을 때 페이지 폭이 늘어난다.
