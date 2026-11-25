@@ -30,7 +30,8 @@ APP_URL=https://<도메인>
 ```
 
 - 시크릿은 **코드에 쓰지 말고** `.env`(로컬) 또는 호스팅 서비스의 환경 변수(배포)에만 넣습니다.
-- `APP_URL`을 비우면 요청이 들어온 주소로 콜백 URL을 만듭니다. 프록시 뒤에서 주소가 달라지면 `APP_URL`을 설정하세요.
+- 콜백 주소의 기준이 되는 "정식 주소"는 `APP_URL` → (Vercel production이면) Vercel이 자동으로 넣는 `VERCEL_PROJECT_PRODUCTION_URL` → 요청이 들어온 주소 순으로 정합니다. Vercel에서는 `APP_URL` 없이도 정식 도메인이 쓰입니다.
+- 정식 주소가 아닌 곳(배포별 주소 `todo-goals-xxxx.vercel.app`, `…-git-master-…` 등)에서 로그인을 누르면 정식 주소로 이동한 뒤 GitHub 로그인을 시작합니다.
 
 ## 3. 데이터 마이그레이션 (기존 데이터가 있을 때)
 

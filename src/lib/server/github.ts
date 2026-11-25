@@ -24,9 +24,24 @@ function credentials() {
   return { clientId, clientSecret };
 }
 
-/** GitHub 콜백 주소. APP_URL이 있으면 그것을, 없으면 요청이 들어온 origin을 쓴다 */
+/**
+ * 앱의 정식 주소(origin). GitHub OAuth App에는 콜백 주소를 하나만 등록할 수 있으므로,
+ * 어느 주소로 접속했든 로그인은 이 주소에서 시작하고 끝나야 한다.
+ *   1) APP_URL (직접 지정)
+ *   2) Vercel production 배포면 VERCEL_PROJECT_PRODUCTION_URL (Vercel이 자동으로 넣는 정식 도메인)
+ *   3) 그 외(로컬 등)는 요청이 들어온 주소
+ */
+export function appOrigin(requestUrl: string): string {
+  const configured = process.env.APP_URL?.trim();
+  if (configured) return new URL(configured).origin;
+  const vercelProd = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (process.env.VERCEL_ENV === "production" && vercelProd) return `https://${vercelProd}`;
+  return new URL(requestUrl).origin;
+}
+
+/** GitHub 콜백 주소 = 정식 주소 + /auth/github/callback */
 export function callbackUrl(requestUrl: string): string {
-  return new URL("/auth/github/callback", process.env.APP_URL || requestUrl).toString();
+  return new URL("/auth/github/callback", appOrigin(requestUrl)).toString();
 }
 
 export function authorizeUrl(state: string, redirectUri: string): string {
